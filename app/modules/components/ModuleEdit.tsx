@@ -1,37 +1,44 @@
-import { useQuery, useMutation, Link, validateZodSchema, Routes } from "blitz"
-import { useState, useEffect } from "react"
-import algoliasearch from "algoliasearch"
-import { z } from "zod"
-import { getAlgoliaResults } from "@algolia/autocomplete-js"
-import { ArrowLeft32, Edit24, EditOff24 } from "@carbon/icons-react"
-import { Prisma } from "prisma"
-import { useFormik } from "formik"
-import { WarningSquareFilled32, Maximize24, TrashCan24 } from "@carbon/icons-react"
-import toast from "react-hot-toast"
-import Xarrows from "react-xarrows"
+import { useQuery, useMutation, Link, validateZodSchema, Routes } from "blitz";
+import { useState, useEffect } from "react";
+import algoliasearch from "algoliasearch";
+import { z } from "zod";
+import { getAlgoliaResults } from "@algolia/autocomplete-js";
+import { ArrowLeft32, Edit24, EditOff24 } from "@carbon/icons-react";
+import { Prisma } from "prisma";
+import { useFormik } from "formik";
+import {
+  WarningSquareFilled32,
+  Maximize24,
+  TrashCan24,
+} from "@carbon/icons-react";
+import toast from "react-hot-toast";
+import Xarrows from "react-xarrows";
 
-import EditMainFile from "./EditMainFile"
-import EditSupportingFiles from "./EditSupportingFiles"
+import EditMainFile from "./EditMainFile";
+import EditSupportingFiles from "./EditSupportingFiles";
 
-import DeleteModuleModal from "../../core/modals/DeleteModuleModal"
-import useCurrentModule from "../queries/useCurrentModule"
-import Autocomplete from "../../core/components/Autocomplete"
-import PublishModuleModal from "../../core/modals/PublishModuleModal"
-import editModuleScreen from "../mutations/editModuleScreen"
-import EditSupportingFileDisplay from "../../core/components/EditSupportingFileDisplay"
-import MetadataView from "./MetadataView"
-import SearchResultModule from "../../core/components/SearchResultModule"
-import MetadataEdit from "./MetadataEdit"
-import addReference from "../mutations/addReference"
-import createReferenceModule from "../mutations/createReferenceModule"
-import deleteReference from "../mutations/deleteReference"
-import { useMediaPredicate } from "react-media-hook"
-import addParent from "../mutations/addParent"
-import ManageParents from "./ManageParents"
-import approveAuthorship from "app/authorship/mutations/approveAuthorship"
-import SettingsModal from "../../core/modals/settings"
+import DeleteModuleModal from "../../core/modals/DeleteModuleModal";
+import useCurrentModule from "../queries/useCurrentModule";
+import Autocomplete from "../../core/components/Autocomplete";
+import PublishModuleModal from "../../core/modals/PublishModuleModal";
+import editModuleScreen from "../mutations/editModuleScreen";
+import EditSupportingFileDisplay from "../../core/components/EditSupportingFileDisplay";
+import MetadataView from "./MetadataView";
+import SearchResultModule from "../../core/components/SearchResultModule";
+import MetadataEdit from "./MetadataEdit";
+import addReference from "../mutations/addReference";
+import createReferenceModule from "../mutations/createReferenceModule";
+import deleteReference from "../mutations/deleteReference";
+import { useMediaPredicate } from "react-media-hook";
+import addParent from "../mutations/addParent";
+import ManageParents from "./ManageParents";
+import approveAuthorship from "app/authorship/mutations/approveAuthorship";
+import SettingsModal from "../../core/modals/settings";
 
-const searchClient = algoliasearch(process.env.ALGOLIA_APP_ID!, process.env.ALGOLIA_API_SEARCH_KEY!)
+const searchClient = algoliasearch(
+  process.env.ALGOLIA_APP_ID!,
+  process.env.ALGOLIA_API_SEARCH_KEY!
+);
 
 const ModuleEdit = ({
   user,
@@ -45,28 +52,28 @@ const ModuleEdit = ({
   setModule,
   fetchDrafts,
 }) => {
-  const [isEditing, setIsEditing] = useState(false)
-  const [addAuthors, setAddAuthors] = useState(false)
-  const [addParentMutation] = useMutation(addParent)
+  const [isEditing, setIsEditing] = useState(false);
+  const [addAuthors, setAddAuthors] = useState(false);
+  const [addParentMutation] = useMutation(addParent);
 
   const [moduleEdit, { refetch, setQueryData }] = useQuery(
     useCurrentModule,
     { suffix: module.suffix },
     { refetchOnWindowFocus: false }
-  )
+  );
 
-  const mainFile = moduleEdit!.main as Prisma.JsonObject
-  const supportingRaw = moduleEdit!.supporting as Prisma.JsonObject
-  const [approveAuthorshipMutation] = useMutation(approveAuthorship)
+  const mainFile = moduleEdit!.main as Prisma.JsonObject;
+  const supportingRaw = moduleEdit!.supporting as Prisma.JsonObject;
+  const [approveAuthorshipMutation] = useMutation(approveAuthorship);
 
-  const [addReferenceMutation] = useMutation(addReference)
-  const [deleteReferenceMutation] = useMutation(deleteReference)
-  const [createReferenceMutation] = useMutation(createReferenceModule)
-  const [editModuleScreenMutation] = useMutation(editModuleScreen)
-  const prefersDarkMode = useMediaPredicate("(prefers-color-scheme: dark)")
-  const [previousOpen, setPreviousOpen] = useState(false)
+  const [addReferenceMutation] = useMutation(addReference);
+  const [deleteReferenceMutation] = useMutation(deleteReference);
+  const [createReferenceMutation] = useMutation(createReferenceModule);
+  const [editModuleScreenMutation] = useMutation(editModuleScreen);
+  const prefersDarkMode = useMediaPredicate("(prefers-color-scheme: dark)");
+  const [previousOpen, setPreviousOpen] = useState(false);
 
-  const arrowColor = prefersDarkMode ? "white" : "#0f172a"
+  const arrowColor = prefersDarkMode ? "white" : "#0f172a";
   const formik = useFormik({
     initialValues: {
       type: moduleEdit!.type.id.toString(),
@@ -89,32 +96,38 @@ const ModuleEdit = ({
         title: values.title,
         description: values.description,
         licenseId: parseInt(values.license),
-      })
-      setQueryData(updatedModule)
-      setIsEditing(false)
+      });
+      setQueryData(updatedModule);
+      setIsEditing(false);
     },
-  })
+  });
 
   useEffect(() => {
-    formik.setFieldValue("type", moduleEdit!.type.id.toString())
-    formik.setFieldValue("title", moduleEdit!.title)
-    formik.setFieldValue("description", moduleEdit!.description)
-    formik.setFieldValue("license", moduleEdit!.license!.id.toString())
-  }, [moduleEdit])
+    formik.setFieldValue("type", moduleEdit!.type.id.toString());
+    formik.setFieldValue("title", moduleEdit!.title);
+    formik.setFieldValue("description", moduleEdit!.description);
+    formik.setFieldValue("license", moduleEdit!.license!.id.toString());
+  }, [moduleEdit]);
 
   const ownAuthorship = moduleEdit?.authors.find(
     (author) => author.workspace?.handle === workspace.handle
-  )
+  );
 
   return (
     <div className="mx-auto max-w-4xl overflow-y-auto p-5 text-base">
       {/* Publish module */}
-      {(moduleEdit!.authors.filter((author) => author.readyToPublish !== true).length === 0 &&
+      {(moduleEdit!.authors.filter((author) => author.readyToPublish !== true)
+        .length === 0 &&
         Object.keys(moduleEdit!.main!).length !== 0) ||
       (moduleEdit!.authors.length === 1 &&
         moduleEdit!.main!["name"] &&
-        (ownAuthorship?.workspace?.firstName || ownAuthorship?.workspace?.lastName)) ? (
-        <PublishModuleModal module={moduleEdit} user={user} workspace={workspace} />
+        (ownAuthorship?.workspace?.firstName ||
+          ownAuthorship?.workspace?.lastName)) ? (
+        <PublishModuleModal
+          module={moduleEdit}
+          user={user}
+          workspace={workspace}
+        />
       ) : (
         <>
           <div className="my-4 flex w-full rounded-md bg-orange-50 p-2 dark:bg-orange-800">
@@ -130,7 +143,8 @@ const ModuleEdit = ({
               </h3>
               <ol className="list-inside list-decimal text-sm">
                 {moduleEdit!.main!["name"] ? "" : <li>Upload a main file</li>}
-                {!ownAuthorship?.workspace?.firstName || !ownAuthorship?.workspace?.lastName ? (
+                {!ownAuthorship?.workspace?.firstName ||
+                !ownAuthorship?.workspace?.lastName ? (
                   <li>
                     You must add your author names in{" "}
                     <SettingsModal
@@ -159,12 +173,12 @@ const ModuleEdit = ({
                           {
                             loading: "Loading",
                             success: (data) => {
-                              setQueryData(data)
-                              return "Version approved for publication"
+                              setQueryData(data);
+                              return "Version approved for publication";
                             },
                             error: "Uh-oh something went wrong.",
                           }
-                        )
+                        );
                       }}
                     >
                       Approve to publish
@@ -181,7 +195,8 @@ const ModuleEdit = ({
               </ol>
               {moduleEdit!.authors.length > 1 ? (
                 <p className="text-sm italic">
-                  Any changes made after approval will force reapproval by all authors.
+                  Any changes made after approval will force reapproval by all
+                  authors.
                 </p>
               ) : (
                 ""
@@ -195,7 +210,7 @@ const ModuleEdit = ({
         {inboxOpen ? (
           <button
             onClick={() => {
-              setInboxOpen(false)
+              setInboxOpen(false);
             }}
           >
             <label className="sr-only">Go full screen</label>
@@ -204,7 +219,7 @@ const ModuleEdit = ({
         ) : (
           <button
             onClick={() => {
-              setInboxOpen(true)
+              setInboxOpen(true);
             }}
           >
             <label className="sr-only">Go full screen</label>
@@ -219,7 +234,7 @@ const ModuleEdit = ({
           <button
             className="mx-auto my-2 flex rounded border border-gray-300 px-2 py-2 text-sm font-normal leading-4 text-gray-700 shadow-sm hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:border-gray-400 dark:hover:bg-gray-700"
             onClick={() => {
-              setPreviousOpen(true)
+              setPreviousOpen(true);
             }}
             disabled={moduleEdit?.parents.length === 0}
           >
@@ -235,7 +250,7 @@ const ModuleEdit = ({
                   {
                     sourceId: "products",
                     async onSelect(params) {
-                      const { item, setQuery } = params
+                      const { item, setQuery } = params;
                       toast.promise(
                         addParentMutation({
                           currentId: module?.id,
@@ -244,13 +259,13 @@ const ModuleEdit = ({
                         {
                           loading: "Adding link...",
                           success: (data) => {
-                            setQueryData(data)
+                            setQueryData(data);
 
-                            return `Linked to: "${item.name}"`
+                            return `Linked to: "${item.name}"`;
                           },
                           error: "Failed to add link...",
                         }
-                      )
+                      );
                     },
                     getItems() {
                       return getAlgoliaResults({
@@ -261,48 +276,59 @@ const ModuleEdit = ({
                             query,
                           },
                         ],
-                      })
+                      });
                     },
                     templates: {
                       item({ item, components }) {
                         // TODO: Need to update search results per Algolia index
-                        return <SearchResultModule item={item} />
+                        return <SearchResultModule item={item} />;
                       },
                       noResults() {
                         return (
                           <>
                             {/* https://www.crossref.org/blog/dois-and-matching-regular-expressions/ */}
-                            {query.match(/^10.\d{4,9}\/[-._;()/:A-Z0-9]+$/i) ? (
+                            {query.match(/10.\d{4,9}\/[-._;()/:A-Z0-9]+$/i) ? (
                               <>
                                 <button
                                   className="text-sm font-normal leading-4 text-gray-900 dark:text-gray-200"
                                   onClick={async () => {
-                                    toast.promise(createReferenceMutation({ doi: query }), {
-                                      loading: "Searching...",
-                                      success: (data) => {
-                                        toast.promise(
-                                          addParentMutation({
-                                            currentId: module?.id,
-                                            connectId: data.id,
-                                          }),
-                                          {
-                                            loading: "Adding link...",
-                                            success: (info) => {
-                                              setQueryData(info)
+                                    toast.promise(
+                                      createReferenceMutation({
+                                        doi: query.match(
+                                          /10.\d{4,9}\/[-._;()/:A-Z0-9]+$/i
+                                        ),
+                                      }),
+                                      {
+                                        loading: "Searching...",
+                                        success: (data) => {
+                                          toast.promise(
+                                            addParentMutation({
+                                              currentId: module?.id,
+                                              connectId: data.id,
+                                            }),
+                                            {
+                                              loading: "Adding link...",
+                                              success: (info) => {
+                                                setQueryData(info);
 
-                                              return `Linked to: "${data.title}"`
-                                            },
-                                            error: "Failed to add link...",
-                                          }
-                                        )
+                                                return `Linked to: "${data.title}"`;
+                                              },
+                                              error: "Failed to add link...",
+                                            }
+                                          );
 
-                                        return "Record added to database"
-                                      },
-                                      error: "Could not add record.",
-                                    })
+                                          return "Record added to database";
+                                        },
+                                        error: "Could not add record.",
+                                      }
+                                    );
                                   }}
                                 >
-                                  Click here to add {query} to ResearchEquals database
+                                  Click here to add{" "}
+                                  {query.match(
+                                    /10.\d{4,9}\/[-._;()/:A-Z0-9]+$/i
+                                  )}{" "}
+                                  to ResearchEquals database
                                 </button>
                               </>
                             ) : (
@@ -311,7 +337,7 @@ const ModuleEdit = ({
                               </p>
                             )}
                           </>
-                        )
+                        );
                       },
                     },
                   },
@@ -325,7 +351,7 @@ const ModuleEdit = ({
             <EditOff24
               className="h-6 w-6 fill-current text-gray-900 dark:text-gray-200"
               onClick={() => {
-                setIsEditing(false)
+                setIsEditing(false);
               }}
               aria-label="End editing mode without saving"
             />
@@ -333,7 +359,7 @@ const ModuleEdit = ({
             <Edit24
               className="h-6 w-6 fill-current text-gray-900 dark:text-gray-200"
               onClick={() => {
-                setIsEditing(true)
+                setIsEditing(true);
               }}
               aria-label="Start editing mode"
             />
@@ -421,8 +447,8 @@ const ModuleEdit = ({
             Reference list
           </h2>
           <p className="my-2 text-xs font-normal leading-4 text-gray-900 dark:text-gray-200">
-            Add any references for your module here. You can cite published modules and objects with
-            a DOI.
+            Add any references for your module here. You can cite published
+            modules and objects with a DOI.
           </p>
           <label htmlFor="search" className="sr-only">
             Search references
@@ -436,7 +462,7 @@ const ModuleEdit = ({
                 {
                   sourceId: "products",
                   async onSelect(params) {
-                    const { item, setQuery } = params
+                    const { item, setQuery } = params;
                     if (item.suffix) {
                       toast.promise(
                         addReferenceMutation({
@@ -446,13 +472,13 @@ const ModuleEdit = ({
                         {
                           loading: "Adding reference...",
                           success: (data) => {
-                            setQueryData(data)
+                            setQueryData(data);
 
-                            return "Added reference!"
+                            return "Added reference!";
                           },
                           error: "Failed to add reference...",
                         }
-                      )
+                      );
                     }
                   },
                   getItems() {
@@ -464,7 +490,7 @@ const ModuleEdit = ({
                           query,
                         },
                       ],
-                    })
+                    });
                   },
                   templates: {
                     item({ item, components }) {
@@ -476,7 +502,7 @@ const ModuleEdit = ({
                             ""
                           )}
                         </>
-                      )
+                      );
                     },
                     noResults() {
                       return (
@@ -487,32 +513,36 @@ const ModuleEdit = ({
                               <button
                                 className="text-sm font-normal leading-4 text-gray-900 dark:text-gray-200"
                                 onClick={async () => {
-                                  toast.promise(createReferenceMutation({ doi: query }), {
-                                    loading: "Searching...",
-                                    success: (data) => {
-                                      toast.promise(
-                                        addReferenceMutation({
-                                          currentId: moduleEdit?.id,
-                                          connectId: data.id,
-                                        }),
-                                        {
-                                          loading: "Adding reference...",
-                                          success: (data) => {
-                                            setQueryData(data)
+                                  toast.promise(
+                                    createReferenceMutation({ doi: query }),
+                                    {
+                                      loading: "Searching...",
+                                      success: (data) => {
+                                        toast.promise(
+                                          addReferenceMutation({
+                                            currentId: moduleEdit?.id,
+                                            connectId: data.id,
+                                          }),
+                                          {
+                                            loading: "Adding reference...",
+                                            success: (data) => {
+                                              setQueryData(data);
 
-                                            return "Added reference!"
-                                          },
-                                          error: "Failed to add reference...",
-                                        }
-                                      )
+                                              return "Added reference!";
+                                            },
+                                            error: "Failed to add reference...",
+                                          }
+                                        );
 
-                                      return "Reference added to database"
-                                    },
-                                    error: "Could not add reference.",
-                                  })
+                                        return "Reference added to database";
+                                      },
+                                      error: "Could not add reference.",
+                                    }
+                                  );
                                 }}
                               >
-                                Click here to add {query} to ResearchEquals database
+                                Click here to add {query} to ResearchEquals
+                                database
                               </button>
                             </>
                           ) : (
@@ -521,7 +551,7 @@ const ModuleEdit = ({
                             </p>
                           )}
                         </>
-                      )
+                      );
                     },
                   },
                 },
@@ -544,12 +574,12 @@ const ModuleEdit = ({
                           {
                             loading: "Deleting reference...",
                             success: (data) => {
-                              setQueryData(data)
-                              return `Removed reference: "${reference.title}"`
+                              setQueryData(data);
+                              return `Removed reference: "${reference.title}"`;
                             },
                             error: "Failed to delete reference...",
                           }
-                        )
+                        );
                       }}
                       aria-label="Delete reference"
                     />
@@ -558,9 +588,14 @@ const ModuleEdit = ({
                     <>
                       {reference.authors.map((author, index) => (
                         <>
-                          <Link href={Routes.HandlePage({ handle: author!.workspace!.handle })}>
+                          <Link
+                            href={Routes.HandlePage({
+                              handle: author!.workspace!.handle,
+                            })}
+                          >
                             <a target="_blank">
-                              {author!.workspace!.lastName}, {author!.workspace!.firstName}
+                              {author!.workspace!.lastName},{" "}
+                              {author!.workspace!.firstName}
                             </a>
                           </Link>
                           {index === reference.authors.length - 1 ? "" : "; "}
@@ -571,20 +606,24 @@ const ModuleEdit = ({
                     <>
                       {reference!.authorsRaw!["object"] ? (
                         <>
-                          {reference!.authorsRaw!["object"].map((author, index) => (
-                            <>
-                              {index === 3
-                                ? "[...]"
-                                : index > 3
-                                ? ""
-                                : author.given && author.family
-                                ? `${author.family}, ${author.given}`
-                                : `${author.name}`}
-                              {index === reference!.authorsRaw!["object"].length - 1 || index > 2
-                                ? ""
-                                : "; "}
-                            </>
-                          ))}
+                          {reference!.authorsRaw!["object"].map(
+                            (author, index) => (
+                              <>
+                                {index === 3
+                                  ? "[...]"
+                                  : index > 3
+                                  ? ""
+                                  : author.given && author.family
+                                  ? `${author.family}, ${author.given}`
+                                  : `${author.name}`}
+                                {index ===
+                                  reference!.authorsRaw!["object"].length - 1 ||
+                                index > 2
+                                  ? ""
+                                  : "; "}
+                              </>
+                            )
+                          )}
                         </>
                       ) : (
                         <>
@@ -615,7 +654,11 @@ const ModuleEdit = ({
         </div>
       </div>
       <div className="text-center">
-        <DeleteModuleModal module={module} setModule={setModule} fetchDrafts={fetchDrafts} />
+        <DeleteModuleModal
+          module={module}
+          setModule={setModule}
+          fetchDrafts={fetchDrafts}
+        />
       </div>
       <ManageParents
         open={previousOpen}
@@ -624,7 +667,7 @@ const ModuleEdit = ({
         setQueryData={setQueryData}
       />
     </div>
-  )
-}
+  );
+};
 
-export default ModuleEdit
+export default ModuleEdit;
